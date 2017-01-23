@@ -7,7 +7,7 @@ ARM Macro Assembler    Page 1
     1 00000000         ;****************** main.s ***************
     2 00000000         ; Program written by: Albert Bautista (abb2639)
     3 00000000         ; Date Created: 1/15/2017 
-    4 00000000         ; Last Modified: 1/15/2017 
+    4 00000000         ; Last Modified: 1/23/2017 
     5 00000000         ; Brief description of the program
     6 00000000         ; The objective of this system is to implement a Car doo
                        r signal system
@@ -78,127 +78,128 @@ ARM Macro Assembler    Page 2
 2
    34 00000000                 EXPORT           Start
    35 00000000         Start
-   36 00000000 481D            LDR              R0,=SYSCTL_RCGCGPIO_R ; R0 poin
-                                                            ts to SYSCTL_RCGCGP
-                                                            IO_R
-   37 00000002 6801            LDR              R1,[R0]     ; [SYSCTL_RCGCGPIO_
-                                                            R] -> R1
-   38 00000004 F041 0120       ORR              R1,#0x20    ; Turn on System Cl
-                                                            ock
-   39 00000008 6001            STR              R1,[R0]     ; write back to [SY
-                                                            SCTL_RCGCGPIO_R]
-   40 0000000A BF00            NOP                          ; Wait for Clock to
-                                                             initialize
-   41 0000000C BF00            NOP
-   42 0000000E         ;Took for Input Output Project to test initialize
-   43 0000000E 491B            LDR              R1, =GPIO_PORTF_LOCK_R ; 2) unl
+   36 00000000         ;Borrowed initialization prompts from Input Output examp
+                       le and changed the enable and direction bits
+   37 00000000 491E            LDR              R1, =SYSCTL_RCGCGPIO_R ; 1) act
+                                                            ivate clock for Por
+                                                            t F
+   38 00000002 6808            LDR              R0, [R1]
+   39 00000004 F040 0020       ORR              R0, R0, #0x20 ; set bit 5 to tu
+                                                            rn on clock
+   40 00000008 6008            STR              R0, [R1]
+   41 0000000A BF00            NOP
+   42 0000000C BF00            NOP                          ; allow time for cl
+                                                            ock to finish
+   43 0000000E 491C            LDR              R1, =GPIO_PORTF_LOCK_R ; 2) unl
                                                             ock the lock regist
                                                             er
-   44 00000010 481B            LDR              R0, =0x4C4F434B ; unlock GPIO P
+   44 00000010 481C            LDR              R0, =0x4C4F434B ; unlock GPIO P
                                                             ort F Commit Regist
                                                             er
    45 00000012 6008            STR              R0, [R1]
-   46 00000014 491B            LDR              R1, =GPIO_PORTF_PCTL_R ; 4) con
-                                                            figure as GPIO
-   47 00000016 F04F 0000       MOV              R0, #0x00000000 ; 0 means confi
-                                                            gure Port F as GPIO
-                                                            
-   48 0000001A 6008            STR              R0, [R1]
-   49 0000001C 491A            LDR              R1, =GPIO_PORTF_CR_R ; enable c
+   46 00000014 491C            LDR              R1, =GPIO_PORTF_CR_R ; enable c
                                                             ommit for Port F
-   50 0000001E F04F 00FF       MOV              R0, #0xFF   ; 1 means allow acc
+   47 00000016 F04F 00FF       MOV              R0, #0xFF   ; 1 means allow acc
                                                             ess
-   51 00000022 6008            STR              R0, [R1]
-   52 00000024 4919            LDR              R1, =GPIO_PORTF_AMSEL_R ; 3) di
+   48 0000001A 6008            STR              R0, [R1]
+   49 0000001C 491B            LDR              R1, =GPIO_PORTF_AMSEL_R ; 3) di
                                                             sable analog functi
                                                             onality
-   53 00000026 F04F 0000       MOV              R0, #0      ; 0 means analog is
+   50 0000001E F04F 0000       MOV              R0, #0      ; 0 means analog is
                                                              off
+   51 00000022 6008            STR              R0, [R1]
+   52 00000024 491A            LDR              R1, =GPIO_PORTF_PCTL_R ; 4) con
+                                                            figure as GPIO
+   53 00000026 F04F 0000       MOV              R0, #0x00000000 ; 0 means confi
+                                                            gure Port F as GPIO
+                                                            
    54 0000002A 6008            STR              R0, [R1]
-   55 0000002C 4918            LDR              R1, =GPIO_PORTF_AFSEL_R ; 6) re
+   55 0000002C 4919            LDR              R1, =GPIO_PORTF_DIR_R ; 5) set 
+                                                            direction register
+   56 0000002E F04F 000A       MOV              R0,#0x0A    ; PF0 and PF7-4 inp
+                                                            ut, PF3-1 output
+   57 00000032 6008            STR              R0, [R1]
+   58 00000034 4918            LDR              R1, =GPIO_PORTF_AFSEL_R ; 6) re
                                                             gular port function
                                                             
-   56 0000002E F04F 0000       MOV              R0, #0      ; 0 means disable a
+   59 00000036 F04F 0000       MOV              R0, #0      ; 0 means disable a
                                                             lternate function 
-   57 00000032         ;ADD CR?
-   58 00000032 4818            LDR              R0,=GPIO_PORTF_DEN_R ; R0 point
-                                                            s to DEN_R
-   59 00000034 6801            LDR              R1,[R0]     ; Loads DEN_R -> R1
-                                                            
-   60 00000036 F041 011B       ORR              R1,#0x1B    ; Enables PF0, PF1,
-                                                             PF3 & PF4
-   61 0000003A 6001            STR              R1,[R0]     ; Writes back to DE
+   60 0000003A 6008            STR              R0, [R1]
+   61 0000003C 4917            LDR              R1, =GPIO_PORTF_PUR_R ; pull-up
+                                                             resistors for PF4,
+                                                            PF0
 
 
 
 ARM Macro Assembler    Page 3 
 
 
-                                                            N_R
-   62 0000003C 4816            LDR              R0,=GPIO_PORTF_DIR_R ; R0 point
-                                                            s to DIR_R
-   63 0000003E 6801            LDR              R1,[R0]     ; Loads DIR_R -> R1
-                                                            
-   64 00000040 F041 010A       ORR              R1,#0x0A    ; Sets PF1 & PF3 as
-                                                             outputs, PF4 & PF0
-                                                             as inputs
-   65 00000044 6001            STR              R1,[R0]     ; Writes back to DI
-                                                            R_R
-   66 00000046 4815            LDR              R0,=GPIO_PORTF_DATA_R 
-                                                            ; R0 = x4000253FC
-   67 00000048         
-   68 00000048         loop
-   69 00000048 6801            LDR              R1,[R0]     ; [DATA_R] -> R1
-   70 0000004A F001 0201       AND              R2,R1,#0x01 ; Masks DATA_R bit 
+   62 0000003E F04F 0011       MOV              R0, #0x11   ; enable weak pull-
+                                                            up on PF0 and PF4
+   63 00000042 6008            STR              R0, [R1]
+   64 00000044 4916            LDR              R1, =GPIO_PORTF_DEN_R ; 7) enab
+                                                            le Port F digital p
+                                                            ort
+   65 00000046 F04F 001B       MOV              R0, #0x1B   ; 1 means enable di
+                                                            gital I/O
+   66 0000004A 6008            STR              R0, [R1]
+   67 0000004C 4815            LDR              R0,=GPIO_PORTF_DATA_R ; R0 poin
+                                                            ts to DATA_R for Po
+                                                            rt F
+   68 0000004E         
+   69 0000004E         loop
+   70 0000004E 6801            LDR              R1,[R0]     ; [DATA_R] -> R1
+   71 00000050 F001 0201       AND              R2,R1,#0x01 ; Masks DATA_R bit 
                                                             0 to place into R2
-   71 0000004E F001 0310       AND              R3,R1,#0x10 ; Masks DATA_R bit 
+   72 00000054 F001 0310       AND              R3,R1,#0x10 ; Masks DATA_R bit 
                                                             4 to place into R3
-   72 00000052 EA4F 04C2       MOV              R4,R2,LSL #3 ; R4 -> DATA_R bit
+   73 00000058 EA4F 04C2       MOV              R4,R2,LSL #3 ; R4 -> DATA_R bit
                                                              0 in bit 3
-   73 00000056 EA4F 0553       MOV              R5,R3,LSR #1 ; R5 -> DATA_R bit
+   74 0000005C EA4F 0553       MOV              R5,R3,LSR #1 ; R5 -> DATA_R bit
                                                              4 in bit 3
-   74 0000005A         ;EOR R4,#8    ; NOT R4[3] Negative Logic already impleme
+   75 00000060         ;EOR R4,#8    ; NOT R4[3] Negative Logic already impleme
                        nted no need for this
-   75 0000005A         ;EOR R5,#8    ; NOT R5[3] Negative Logic already impleme
+   76 00000060         ;EOR R5,#8    ; NOT R5[3] Negative Logic already impleme
                        nted no need for this
-   76 0000005A EA05 0604       AND              R6,R5,R4    ; R4[3] & R5[3] -> 
+   77 00000060 EA05 0604       AND              R6,R5,R4    ; R4[3] & R5[3] -> 
                                                             R6[3]
-   77 0000005E F086 0708       EOR              R7,R6,#8    ; ??? Maybe puts NO
+   78 00000064 F086 0708       EOR              R7,R6,#8    ; ??? Maybe puts NO
                                                             T R6[3] -> R7[1]
-   78 00000062 EA4F 0797       LSR              R7,#2       ; R7[3]-R7[1]
-   79 00000066 F001 01F5       AND              R1,#0xF5    ; Clears Bits 1 & 3
+   79 00000068 EA4F 0797       LSR              R7,#2       ; R7[3]-R7[1]
+   80 0000006C F001 01F5       AND              R1,#0xF5    ; Clears Bits 1 & 3
                                                             
-   80 0000006A EA41 0106       ORR              R1,R1,R6    ; Copies Bit 3 of R
+   81 00000070 EA41 0106       ORR              R1,R1,R6    ; Copies Bit 3 of R
                                                             6 -> R1 to be put i
                                                             nto system
-   81 0000006E EA41 0107       ORR              R1,R1,R7    ; Copies Bit 1 of R
+   82 00000074 EA41 0107       ORR              R1,R1,R7    ; Copies Bit 1 of R
                                                             6 -> R1 to be put i
                                                             nto system
-   82 00000072 6001            STR              R1,[R0]     ; Stores Outputs ba
+   83 00000078 6001            STR              R1,[R0]     ; Stores Outputs ba
                                                             ck into [DATA_R]
-   83 00000074 E7E8            B                loop
-   84 00000076         
-   85 00000076 00 00           ALIGN                        ; make sure the end
+   84 0000007A E7E8            B                loop
+   85 0000007C         
+   86 0000007C                 ALIGN                        ; make sure the end
                                                              of this section is
                                                              aligned
-   86 00000078                 END                          ; end of file
+   87 0000007C                 END                          ; end of file
               400FE608 
               40025520 
               4C4F434B 
-              4002552C 
               40025524 
               40025528 
-              40025420 
-              4002551C 
+              4002552C 
               40025400 
+              40025420 
+              40025510 
+              4002551C 
               400253FC 
-Command Line: --debug --xref --cpu=Cortex-M4 --apcs=interwork --depend=.\main.d
 
 
 
 ARM Macro Assembler    Page 4 
 
 
+Command Line: --debug --xref --cpu=Cortex-M4 --apcs=interwork --depend=.\main.d
  -o.\main.o -IC:\Keil\ARM\RV31\INC -IC:\Keil\ARM\CMSIS\Include -IC:\Keil\ARM\In
 c\Luminary --predefine="__EVAL SETA 1" --list=.\main.lst main.s
 
@@ -238,13 +239,13 @@ Symbol: Start
    Uses
       At line 34 in file main.s
 Comment: Start used once
-loop 00000048
+loop 0000004E
 
 Symbol: loop
    Definitions
-      At line 68 in file main.s
+      At line 69 in file main.s
    Uses
-      At line 83 in file main.s
+      At line 84 in file main.s
 Comment: loop used once
 3 symbols
 
@@ -267,7 +268,7 @@ Symbol: GPIO_PORTF_AFSEL_R
    Definitions
       At line 20 in file main.s
    Uses
-      At line 55 in file main.s
+      At line 58 in file main.s
 Comment: GPIO_PORTF_AFSEL_R used once
 GPIO_PORTF_AMSEL_R 40025528
 
@@ -275,7 +276,7 @@ Symbol: GPIO_PORTF_AMSEL_R
    Definitions
       At line 25 in file main.s
    Uses
-      At line 52 in file main.s
+      At line 49 in file main.s
 Comment: GPIO_PORTF_AMSEL_R used once
 GPIO_PORTF_CR_R 40025524
 
@@ -283,7 +284,7 @@ Symbol: GPIO_PORTF_CR_R
    Definitions
       At line 24 in file main.s
    Uses
-      At line 49 in file main.s
+      At line 46 in file main.s
 Comment: GPIO_PORTF_CR_R used once
 GPIO_PORTF_DATA_R 400253FC
 
@@ -291,7 +292,7 @@ Symbol: GPIO_PORTF_DATA_R
    Definitions
       At line 18 in file main.s
    Uses
-      At line 66 in file main.s
+      At line 67 in file main.s
 Comment: GPIO_PORTF_DATA_R used once
 GPIO_PORTF_DEN_R 4002551C
 
@@ -299,7 +300,7 @@ Symbol: GPIO_PORTF_DEN_R
    Definitions
       At line 22 in file main.s
    Uses
-      At line 58 in file main.s
+      At line 64 in file main.s
 Comment: GPIO_PORTF_DEN_R used once
 GPIO_PORTF_DIR_R 40025400
 
@@ -307,7 +308,7 @@ Symbol: GPIO_PORTF_DIR_R
    Definitions
       At line 19 in file main.s
    Uses
-      At line 62 in file main.s
+      At line 55 in file main.s
 Comment: GPIO_PORTF_DIR_R used once
 GPIO_PORTF_LOCK_R 40025520
 
@@ -329,7 +330,7 @@ Symbol: GPIO_PORTF_PCTL_R
    Definitions
       At line 26 in file main.s
    Uses
-      At line 46 in file main.s
+      At line 52 in file main.s
 Comment: GPIO_PORTF_PCTL_R used once
 GPIO_PORTF_PUR_R 40025510
 
@@ -337,15 +338,15 @@ Symbol: GPIO_PORTF_PUR_R
    Definitions
       At line 21 in file main.s
    Uses
-      None
-Comment: GPIO_PORTF_PUR_R unused
+      At line 61 in file main.s
+Comment: GPIO_PORTF_PUR_R used once
 SYSCTL_RCGCGPIO_R 400FE608
 
 Symbol: SYSCTL_RCGCGPIO_R
    Definitions
       At line 28 in file main.s
    Uses
-      At line 36 in file main.s
+      At line 37 in file main.s
 Comment: SYSCTL_RCGCGPIO_R used once
 11 symbols
 348 symbols in table

@@ -33,38 +33,39 @@ SYSCTL_RCGCGPIO_R  EQU   0x400FE608
       AREA    |.text|, CODE, READONLY, ALIGN=2
       EXPORT  Start
 Start
-	LDR	R0,=SYSCTL_RCGCGPIO_R	;	R0 points to SYSCTL_RCGCGPIO_R
-	LDR	R1,[R0]					;	[SYSCTL_RCGCGPIO_R] -> R1
-	ORR	R1,#0x20					;	Turn on System Clock
-	STR	R1,[R0]					;	write back to [SYSCTL_RCGCGPIO_R]
-	NOP							;	Wait for Clock to initialize
-	NOP
-	;Took for Input Output Project to test initialize
-	LDR R1, =GPIO_PORTF_LOCK_R      ; 2) unlock the lock register
+	;Borrowed initialization prompts from Input Output example and changed the enable and direction bits
+    LDR R1, =SYSCTL_RCGCGPIO_R      ; 1) activate clock for Port F
+    LDR R0, [R1]                 
+    ORR R0, R0, #0x20               ; set bit 5 to turn on clock
+    STR R0, [R1]                  
+    NOP
+    NOP                             ; allow time for clock to finish
+    LDR R1, =GPIO_PORTF_LOCK_R      ; 2) unlock the lock register
     LDR R0, =0x4C4F434B             ; unlock GPIO Port F Commit Register
     STR R0, [R1]                    
-	LDR R1, =GPIO_PORTF_PCTL_R      ; 4) configure as GPIO
-    MOV R0, #0x00000000             ; 0 means configure Port F as GPIO
-    STR R0, [R1]                  
-	LDR R1, =GPIO_PORTF_CR_R        ; enable commit for Port F
+    LDR R1, =GPIO_PORTF_CR_R        ; enable commit for Port F
     MOV R0, #0xFF                   ; 1 means allow access
     STR R0, [R1]                    
     LDR R1, =GPIO_PORTF_AMSEL_R     ; 3) disable analog functionality
     MOV R0, #0                      ; 0 means analog is off
     STR R0, [R1]                    
-	LDR R1, =GPIO_PORTF_AFSEL_R     ; 6) regular port function
+    LDR R1, =GPIO_PORTF_PCTL_R      ; 4) configure as GPIO
+    MOV R0, #0x00000000             ; 0 means configure Port F as GPIO
+    STR R0, [R1]                  
+    LDR R1, =GPIO_PORTF_DIR_R       ; 5) set direction register
+    MOV R0,#0x0A                    ; PF0 and PF7-4 input, PF3-1 output
+    STR R0, [R1]                    
+    LDR R1, =GPIO_PORTF_AFSEL_R     ; 6) regular port function
     MOV R0, #0                      ; 0 means disable alternate function 
-	;ADD CR?
-	LDR	R0,=GPIO_PORTF_DEN_R	;	R0 points to DEN_R
-	LDR	R1,[R0]					;	Loads DEN_R -> R1
-	ORR	R1,#0x1B					;	Enables PF0, PF1, PF3 & PF4
-	STR	R1,[R0]					;	Writes back to DEN_R
-	LDR	R0,=GPIO_PORTF_DIR_R	;	R0 points to DIR_R
-	LDR	R1,[R0]					;	Loads DIR_R -> R1
-	ORR	R1,#0x0A					;	Sets PF1 & PF3 as outputs, PF4 & PF0 as inputs
-	STR R1,[R0]					;	Writes back to DIR_R
-	LDR	R0,=GPIO_PORTF_DATA_R	;	R0 = x4000253FC
-	
+    STR R0, [R1]                    
+    LDR R1, =GPIO_PORTF_PUR_R       ; pull-up resistors for PF4,PF0
+    MOV R0, #0x11                   ; enable weak pull-up on PF0 and PF4
+    STR R0, [R1]              
+    LDR R1, =GPIO_PORTF_DEN_R       ; 7) enable Port F digital port
+    MOV R0, #0x1B                   ; 1 means enable digital I/O
+    STR R0, [R1]
+	LDR	R0,=GPIO_PORTF_DATA_R		; R0 points to DATA_R for Port F
+
 loop
 	LDR	R1,[R0]					;	[DATA_R] -> R1
 	AND	R2,R1,#0x01				;	Masks DATA_R bit 0 to place into R2
