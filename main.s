@@ -1,7 +1,7 @@
 ;****************** main.s ***************
 ; Program written by: Albert Bautista (abb2639)
 ; Date Created: 1/15/2017 
-; Last Modified: 1/23/2017 
+; Last Modified: 1/25/2017 
 ; Brief description of the program
 ; The objective of this system is to implement a Car door signal system
 ; Hardware connections: Inputs are negative logic; output is positive logic
@@ -64,22 +64,22 @@ Start
     LDR R1, =GPIO_PORTF_DEN_R       ; 7) enable Port F digital port
     MOV R0, #0x1B                   ; 1 means enable digital I/O
     STR R0, [R1]
-	LDR	R0,=GPIO_PORTF_DATA_R		; R0 points to DATA_R for Port F
+	LDR	R0,=GPIO_PORTF_DATA_R		; R0 points to DATA_R for Port F to allow to read inputs and write outputs to the location
 
 loop
 	LDR	R1,[R0]					;	[DATA_R] -> R1
-	AND	R2,R1,#0x01				;	Masks DATA_R bit 0 to place into R2
-	AND	R3,R1,#0x10				;	Masks DATA_R bit 4 to place into R3
-	MOV R4,R2,LSL #3			;	R4 -> DATA_R bit 0 in bit 3
-	MOV	R5,R3,LSR #1			;	R5 -> DATA_R bit 4 in bit 3
+	AND	R2,R1,#0x01				;	Masks DATA_R bit 0 for right door input
+	AND	R3,R1,#0x10				;	Masks DATA_R bit 4 for left door input
+	MOV R4,R2,LSL #3			;	R4 -> DATA_R bit 0 into the same bit position for comparison
+	MOV	R5,R3,LSR #1			;	R5 -> DATA_R bit 4 into the same bit position for comparison
 	;EOR	R4,#8				;	NOT R4[3] Negative Logic already implemented no need for this
 	;EOR	R5,#8				;	NOT	R5[3] Negative Logic already implemented no need for this
-	AND	R6,R5,R4				;	R4[3] & R5[3] -> R6[3]
+	AND	R6,R5,R4				;	R4[3] & R5[3] -> R6[3] Compare if both switches are on for safe LED
 	EOR	R7,R6,#8				;	??? Maybe puts NOT R6[3] -> R7[1]
-	LSR	R7,#2					;	R7[3]-R7[1]
-	AND	R1,#0xF5				;	Clears Bits 1 & 3
-	ORR	R1,R1,R6				;	Copies Bit 3 of R6 -> R1 to be put into system
-	ORR R1,R1,R7				;	Copies Bit 1 of R6 -> R1 to be put into system
+	LSR	R7,#2					;	R7[3]-R7[1] Places the complement of safe LED into unsafe LED bit position
+	AND	R1,#0xF5				;	Clears Bits 1 & 3 to have empty spaces to 
+	ORR	R1,R1,R6				;	Copies New PF_3 Safe LED to be put into system
+	ORR R1,R1,R7				;	Copies New PF_1 Unsafe LED to be put into system
 	STR	R1,[R0]					;	Stores Outputs back into [DATA_R]
     B   loop
 	
