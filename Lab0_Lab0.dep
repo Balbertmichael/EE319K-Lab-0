@@ -1,3 +1,3 @@
 Dependencies for Project 'Lab0', Target 'Lab0': (DO NOT MODIFY !)
 F (.\Startup.s)(0x5886B8C9)(--cpu Cortex-M4 --pd "__EVAL SETA 1" -g --apcs=interwork -I C:\Keil\ARM\RV31\INC-I C:\Keil\ARM\CMSIS\Include-I C:\Keil\ARM\Inc\Luminary--list .\startup.lst --xref -o .\startup.o --depend .\startup.d)
-F (.\main.s)(0x5888DB1E)(--cpu Cortex-M4 --pd "__EVAL SETA 1" -g --apcs=interwork -I C:\Keil\ARM\RV31\INC-I C:\Keil\ARM\CMSIS\Include-I C:\Keil\ARM\Inc\Luminary--list .\main.lst --xref -o .\main.o --depend .\main.d)
+F (.\main.s)(0x58897FE6)(--cpu Cortex-M4 --pd "__EVAL SETA 1" -g --apcs=interwork -I C:\Keil\ARM\RV31\INC-I C:\Keil\ARM\CMSIS\Include-I C:\Keil\ARM\Inc\Luminary--list .\main.lst --xref -o .\main.o --depend .\main.d)

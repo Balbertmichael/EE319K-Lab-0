@@ -158,25 +158,25 @@ ARM Macro Assembler    Page 3
    72 00000054 F001 0310       AND              R3,R1,#0x10 ; Masks DATA_R bit 
                                                             4 for left door inp
                                                             ut
-   73 00000058 EA4F 04C2       MOV              R4,R2,LSL #3 ; R4 -> DATA_R bit
+   73 00000058 EA4F 02C2       MOV              R2,R2,LSL #3 ; R2 -> DATA_R bit
                                                              0 into the same bi
                                                             t position for comp
                                                             arison
-   74 0000005C EA4F 0553       MOV              R5,R3,LSR #1 ; R5 -> DATA_R bit
+   74 0000005C EA4F 0353       MOV              R3,R3,LSR #1 ; R3 -> DATA_R bit
                                                              4 into the same bi
                                                             t position for comp
                                                             arison
-   75 00000060         ;EOR R4,#8    ; NOT R4[3] Negative Logic already impleme
+   75 00000060         ;EOR R2,#8    ; NOT R2[3] Negative Logic already impleme
                        nted no need for this
-   76 00000060         ;EOR R5,#8    ; NOT R5[3] Negative Logic already impleme
+   76 00000060         ;EOR R3,#8    ; NOT R3[3] Negative Logic already impleme
                        nted no need for this
-   77 00000060 EA05 0604       AND              R6,R5,R4    ; R4[3] & R5[3] -> 
-                                                            R6[3] Compare if bo
+   77 00000060 EA02 0203       AND              R2,R2,R3    ; R2[3] & R3[3] -> 
+                                                            R2[3] Compare if bo
                                                             th switches are on 
                                                             for safe LED
-   78 00000064 F086 0708       EOR              R7,R6,#8    ; ??? Maybe puts NO
-                                                            T R6[3] -> R7[1]
-   79 00000068 EA4F 0797       LSR              R7,#2       ; R7[3]-R7[1] Place
+   78 00000064 F082 0308       EOR              R3,R2,#8    ; Puts NOT R2[3] ->
+                                                             R3[3]
+   79 00000068 EA4F 0393       LSR              R3,#2       ; R3[3]-R3[1] Place
                                                             s the complement of
                                                              safe LED into unsa
                                                             fe LED bit position
@@ -184,10 +184,10 @@ ARM Macro Assembler    Page 3
    80 0000006C F001 01F5       AND              R1,#0xF5    ; Clears Bits 1 & 3
                                                              to have empty spac
                                                             es to 
-   81 00000070 EA41 0106       ORR              R1,R1,R6    ; Copies New PF_3 S
+   81 00000070 EA41 0102       ORR              R1,R1,R2    ; Copies New PF_3 S
                                                             afe LED to be put i
                                                             nto system
-   82 00000074 EA41 0107       ORR              R1,R1,R7    ; Copies New PF_1 U
+   82 00000074 EA41 0103       ORR              R1,R1,R3    ; Copies New PF_1 U
                                                             nsafe LED to be put
                                                              into system
    83 00000078 6001            STR              R1,[R0]     ; Stores Outputs ba
